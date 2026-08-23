@@ -12,16 +12,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Java 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-          cache: maven
-
       - name: Extract Project ZIP
         run: |
-          mkdir extracted
+          mkdir -p extracted
           unzip -q AstraSMP-1.0.0-Paper-1.21.11.zip -d extracted
 
       - name: Find Maven Project
@@ -33,6 +26,14 @@ jobs:
           fi
           echo "Found: $POM"
           echo "PROJECT_DIR=$(dirname "$POM")" >> "$GITHUB_ENV"
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: '${{ env.PROJECT_DIR }}/pom.xml'
 
       - name: Build Plugin
         run: |
