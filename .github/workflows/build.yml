@@ -19,17 +19,28 @@ jobs:
           java-version: '21'
           cache: maven
 
-      - name: Extract ZIP
+      - name: Extract Project ZIP
         run: |
+          mkdir extracted
           unzip -q AstraSMP-1.0.0-Paper-1.21.11.zip -d extracted
+
+      - name: Find Maven Project
+        run: |
+          POM=$(find extracted -name pom.xml -type f | head -n 1)
+          if [ -z "$POM" ]; then
+            echo "ERROR: pom.xml not found!"
+            exit 1
+          fi
+          echo "Found: $POM"
+          echo "PROJECT_DIR=$(dirname "$POM")" >> "$GITHUB_ENV"
 
       - name: Build Plugin
         run: |
-          cd extracted/AstraSMP
+          cd "$PROJECT_DIR"
           mvn clean package -DskipTests
 
       - name: Upload JAR
         uses: actions/upload-artifact@v4
         with:
           name: AstraSMP-JAR
-          path: extracted/AstraSMP/target/*.jar
+          path: '${{ env.PROJECT_DIR }}/target/*.jar'
